@@ -14,17 +14,19 @@ interface Envelope3DProps {
 export const Envelope3D: React.FC<Envelope3DProps> = ({ amount, isClaimed, isOpen, showContent, className }) => {
   const tier = getTierForAmount(amount);
 
-  // Animation variants for the flap - rotates backward from TOP edge to open
+  // Animation variants for the flap - flips up to open like the reference image
   const flapVariants: Variants = {
     closed: {
-      rotateX: 0,
+      scaleY: 1,
+      y: 0,
       zIndex: 30,
-      transition: { duration: 0.5, ease: "easeInOut" }
+      transition: { duration: 0.4, ease: "easeInOut" }
     },
     open: {
-      rotateX: -180,
+      scaleY: -1,
+      y: '-100%',
       zIndex: 1,
-      transition: { duration: 0.6, ease: "easeInOut" }
+      transition: { duration: 0.5, ease: "easeOut" }
     }
   };
 
@@ -67,57 +69,29 @@ export const Envelope3D: React.FC<Envelope3DProps> = ({ amount, isClaimed, isOpe
              </div>
         </div>
 
-        {/* 4. The Flap Container - 3D Context Isolated Here */}
-        <div
-          className="absolute top-0 left-0 right-0 h-[35%] z-30 perspective-1000"
+        {/* 4. The Flap - Triangle pointing down when closed, flips up when open */}
+        <motion.div
+          className="absolute top-0 left-0 right-0 h-[35%] z-30"
+          variants={flapVariants}
+          initial="closed"
+          animate={isOpen ? "open" : "closed"}
           style={{
-            WebkitPerspective: '1000px',
-            perspective: '1000px'
+            transformOrigin: 'center bottom',
+            WebkitTransformOrigin: 'center bottom'
           }}
         >
-          <motion.div
-            className="w-full h-full transform-style-3d"
-            variants={flapVariants}
-            initial="closed"
-            animate={isOpen ? "open" : "closed"}
+          {/* Flap triangle - base at top, tip pointing down */}
+          <div
+            className="absolute inset-0"
             style={{
-              willChange: 'transform',
-              WebkitTransformStyle: 'preserve-3d',
-              transformStyle: 'preserve-3d',
-              transformOrigin: 'center top',
-              WebkitTransformOrigin: 'center top'
+              backgroundColor: tier?.solid || '#10b981',
+              backgroundImage: tier?.gradient,
+              backgroundSize: 'cover',
+              clipPath: 'polygon(0% 0%, 100% 0%, 50% 100%)',
+              WebkitClipPath: 'polygon(0% 0%, 100% 0%, 50% 100%)'
             }}
-          >
-            {/* Front of Flap (Closed state) - triangle pointing DOWN like a sealed envelope */}
-            <div
-              className="absolute inset-0"
-              style={{
-                backgroundColor: tier?.solid || '#10b981',
-                backgroundImage: tier?.gradient,
-                backgroundSize: 'cover',
-                clipPath: 'polygon(0% 0%, 100% 0%, 50% 100%)',
-                WebkitClipPath: 'polygon(0% 0%, 100% 0%, 50% 100%)',
-                backfaceVisibility: 'hidden',
-                WebkitBackfaceVisibility: 'hidden',
-                transform: 'translateZ(1px)',
-                WebkitTransform: 'translateZ(1px)'
-              }}
-            />
-
-            {/* Back of Flap (Visible when open) */}
-            <div
-               className="absolute inset-0 bg-white/95"
-               style={{
-                 transform: 'rotateX(180deg) translateZ(0px)',
-                 WebkitTransform: 'rotateX(180deg) translateZ(0px)',
-                 clipPath: 'polygon(0% 0%, 100% 0%, 50% 100%)',
-                 WebkitClipPath: 'polygon(0% 0%, 100% 0%, 50% 100%)',
-                 backfaceVisibility: 'hidden',
-                 WebkitBackfaceVisibility: 'hidden'
-               }}
-            />
-          </motion.div>
-        </div>
+          />
+        </motion.div>
 
       </div>
     </div>
