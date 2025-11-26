@@ -16,52 +16,35 @@ export const formatCurrency = (amount: number) => {
 };
 
 // Storage Helpers
-const STORAGE_KEY = 'envelope_challenge_data_v1';
+const STORAGE_KEY = 'envelope_challenge_data_v2';
 
 export const getInitialData = (): StorageData => {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
       const parsed = JSON.parse(stored);
-      
-      // Robust Check: Ensure 'envelopes' exists and has keys. 
-      // If the data structure is malformed (e.g. from an old version), rebuild it but try to keep donors.
-      if (!parsed.envelopes || Object.keys(parsed.envelopes).length === 0) {
-        throw new Error("Invalid envelope data structure");
+      // Robust checks
+      if (!parsed.envelopes || typeof parsed.envelopes !== 'object') {
+        throw new Error("Invalid envelope data");
       }
-
-      // Ensure 'donors' is always an array
-      const donors = Array.isArray(parsed.donors) ? parsed.donors : [];
-
       return {
         envelopes: parsed.envelopes,
-        donors: donors
+        donors: Array.isArray(parsed.donors) ? parsed.donors : []
       };
     }
   } catch (error) {
-    console.warn("Could not load/parse local storage, resetting to default:", error);
-    // Remove corrupted data to prevent persistent crashes
+    console.warn("Resetting storage:", error);
     localStorage.removeItem(STORAGE_KEY);
   }
 
-  // Initialize Default State
+  // Default Init
   const envelopes: Record<number, EnvelopeData> = {};
   for (let i = 1; i <= CONFIG.TOTAL_ENVELOPES; i++) {
-    envelopes[i] = {
-      id: i,
-      amount: i,
-      isClaimed: false,
-    };
+    envelopes[i] = { id: i, amount: i, isClaimed: false };
   }
 
-  const initialData = {
-    envelopes,
-    donors: [],
-  };
-  
-  // Persist the initial state immediately so it exists on next load
+  const initialData = { envelopes, donors: [] };
   saveToStorage(initialData);
-  
   return initialData;
 };
 
@@ -69,6 +52,6 @@ export const saveToStorage = (data: StorageData) => {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   } catch (e) {
-    console.error("Failed to save to local storage", e);
+    console.error("Storage save failed", e);
   }
 };
