@@ -88,15 +88,15 @@ export const Envelope3D: React.FC<Envelope3DProps> = ({ amount, isClaimed, isOpe
               WebkitTransformOrigin: 'center bottom'
             }}
           >
-            {/* Front of Flap (Closed state) - triangle pointing DOWN into envelope */}
+            {/* Front of Flap (Closed state) - triangle pointing UP, base at bottom */}
             <div
               className="absolute inset-0"
               style={{
                 backgroundColor: tier?.solid || '#10b981',
                 backgroundImage: tier?.gradient,
                 backgroundSize: 'cover',
-                clipPath: 'polygon(0% 0%, 100% 0%, 50% 100%)',
-                WebkitClipPath: 'polygon(0% 0%, 100% 0%, 50% 100%)',
+                clipPath: 'polygon(0% 100%, 50% 0%, 100% 100%)',
+                WebkitClipPath: 'polygon(0% 100%, 50% 0%, 100% 100%)',
                 backfaceVisibility: 'hidden',
                 WebkitBackfaceVisibility: 'hidden',
                 transform: 'translateZ(1px)',
@@ -110,8 +110,8 @@ export const Envelope3D: React.FC<Envelope3DProps> = ({ amount, isClaimed, isOpe
                style={{
                  transform: 'rotateX(180deg) translateZ(0px)',
                  WebkitTransform: 'rotateX(180deg) translateZ(0px)',
-                 clipPath: 'polygon(0% 0%, 100% 0%, 50% 100%)',
-                 WebkitClipPath: 'polygon(0% 0%, 100% 0%, 50% 100%)',
+                 clipPath: 'polygon(0% 100%, 50% 0%, 100% 100%)',
+                 WebkitClipPath: 'polygon(0% 100%, 50% 0%, 100% 100%)',
                  backfaceVisibility: 'hidden',
                  WebkitBackfaceVisibility: 'hidden'
                }}

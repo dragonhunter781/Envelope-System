@@ -67,7 +67,7 @@ const App: React.FC = () => {
   const [filter, setFilter] = useState<Tier>('ALL');
   const [timeLeft, setTimeLeft] = useState<{ days: number; hours: number; minutes: number; seconds: number }>({ days: 0, hours: 0, minutes: 0, seconds: 0 });
   const [showCompletionModal, setShowCompletionModal] = useState(false);
-  const [showSharePrompt, setShowSharePrompt] = useState(false);
+  const [verifiedDonor, setVerifiedDonor] = useState<{ name: string; amount: number } | null>(null);
 
   // Recalculate totals immediately based on data state
   const envelopes = Object.values(data.envelopes) as EnvelopeData[];
@@ -103,6 +103,27 @@ const App: React.FC = () => {
     const timer = setInterval(calculateTimeLeft, 1000);
     calculateTimeLeft();
     return () => clearInterval(timer);
+  }, []);
+
+  // Check if user is a verified donor (from localStorage)
+  useEffect(() => {
+    const checkDonorStatus = async () => {
+      const storedEmail = localStorage.getItem('donor_email');
+      const storedName = localStorage.getItem('donor_name');
+      const storedAmount = localStorage.getItem('donor_amount');
+
+      if (storedEmail && storedName && storedAmount) {
+        // User has donated before - verify with Supabase
+        const verified = await db.checkDonorByEmail(storedEmail);
+        if (verified) {
+          setVerifiedDonor(verified);
+        } else {
+          // Fallback to localStorage data if Supabase check fails
+          setVerifiedDonor({ name: storedName, amount: parseInt(storedAmount, 10) });
+        }
+      }
+    };
+    checkDonorStatus();
   }, []);
 
   // Sync Logic
@@ -209,6 +230,9 @@ const App: React.FC = () => {
     setDonatingEnvelope(null);
     setSelectedIds([]);
 
+    // Set verified donor status immediately after donation
+    setVerifiedDonor({ name, amount: currentAmount });
+
     // Fire enhanced confetti celebration
     if (!isCampaignComplete) {
       fireConfetti();
@@ -217,14 +241,13 @@ const App: React.FC = () => {
     await db.claimEnvelopes(idsToClaim, name, email);
   };
 
-  // Allow existing donors to share
+  // Allow verified donors to share their impact
   const handleShareExisting = useCallback(() => {
-    const lastDonor = recentDonors[0];
-    if (lastDonor) {
-      setShareData({ amount: lastDonor.amount, name: lastDonor.name });
+    if (verifiedDonor) {
+      setShareData({ amount: verifiedDonor.amount, name: verifiedDonor.name });
       fireConfetti();
     }
-  }, [recentDonors]);
+  }, [verifiedDonor]);
 
   return (
     <div className="w-full max-w-[420px] lg:max-w-none mx-auto min-h-screen bg-slate-50 text-slate-900 font-sans pb-32 overflow-x-hidden lg:shadow-none lg:border-x-0 shadow-2xl border-x border-slate-100/50">
@@ -328,8 +351,8 @@ const App: React.FC = () => {
                  </Card>
                </motion.div>
 
-               {/* Share Button for Returning Donors */}
-               {recentDonors.length > 0 && (
+               {/* Share Button for Verified Donors Only */}
+               {verifiedDonor && (
                  <motion.div
                    initial={{ opacity: 0, scale: 0.95 }}
                    animate={{ opacity: 1, scale: 1 }}
@@ -341,8 +364,8 @@ const App: React.FC = () => {
                          <div className="flex items-center gap-3">
                            <span className="text-2xl">🎉</span>
                            <div>
-                             <p className="font-bold text-sm lg:text-base">Already donated?</p>
-                             <p className="text-xs lg:text-sm text-white/80">Share your impact with friends!</p>
+                             <p className="font-bold text-sm lg:text-base">Welcome back, {verifiedDonor.name}!</p>
+                             <p className="text-xs lg:text-sm text-white/80">Share your {formatCurrency(verifiedDonor.amount)} gift with friends!</p>
                            </div>
                          </div>
                          <Button

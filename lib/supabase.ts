@@ -79,23 +79,53 @@ export const db = {
 
       if (updateError) throw updateError;
 
-      // 2. Insert into Donors Table
+      // 2. Insert into Donors Table (including email for verification)
       const totalAmount = ids.reduce((sum, id) => sum + id, 0); // Amount = ID in this challenge
 
       const { error: insertError } = await supabase
         .from('donors')
         .insert({
           name: name,
+          email: email,
           amount: totalAmount,
           claimed_at: timestamp
         });
 
       if (insertError) throw insertError;
 
+      // Store email in localStorage for future verification
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('donor_email', email);
+        localStorage.setItem('donor_name', name);
+        localStorage.setItem('donor_amount', totalAmount.toString());
+      }
+
       return true;
     } catch (error) {
       console.error("Supabase Claim Error:", error);
       return false;
+    }
+  },
+
+  // Check if email exists in donors table (returns donor info if found)
+  async checkDonorByEmail(email: string): Promise<{ name: string; amount: number } | null> {
+    if (!supabase || !email) return null;
+
+    try {
+      const { data, error } = await supabase
+        .from('donors')
+        .select('name, amount')
+        .eq('email', email.toLowerCase().trim())
+        .order('claimed_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (error || !data) return null;
+
+      return { name: data.name, amount: data.amount };
+    } catch (error) {
+      console.error("Supabase Donor Check Error:", error);
+      return null;
     }
   },
 
