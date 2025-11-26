@@ -51,12 +51,13 @@ export const ShareModal: React.FC<ShareModalProps> = ({ onClose, data }) => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
+      style={{ WebkitBackdropFilter: 'blur(4px)', backdropFilter: 'blur(4px)' }}
     >
       <motion.div
           initial={{ scale: 0.9, opacity: 0, y: 20 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.9, opacity: 0, y: 20 }}
-          className="w-full max-w-md relative"
+          className="w-full max-w-md lg:max-w-lg relative"
       >
           {/* Close X */}
           <button 

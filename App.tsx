@@ -173,86 +173,136 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="w-full max-w-[420px] mx-auto min-h-screen bg-slate-50 text-slate-900 font-sans pb-32 overflow-x-hidden shadow-2xl border-x border-slate-100/50">
-      
+    <div className="w-full max-w-[420px] lg:max-w-none mx-auto min-h-screen bg-slate-50 text-slate-900 font-sans pb-32 overflow-x-hidden lg:shadow-none lg:border-x-0 shadow-2xl border-x border-slate-100/50">
+
       {/* Sticky Header */}
-      <div className="fixed top-0 left-0 right-0 z-40 mx-auto max-w-[420px] bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm">
-        <div className="px-5 py-3 flex items-center justify-between">
-           <div className="flex items-center gap-2">
-              <span className="text-xl">💌</span>
+      <div
+        className="fixed top-0 left-0 right-0 z-40 mx-auto max-w-[420px] lg:max-w-none bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm"
+        style={{ WebkitBackdropFilter: 'blur(12px)', backdropFilter: 'blur(12px)' }}
+      >
+        <div className="px-5 lg:px-12 xl:px-20 py-3 lg:py-4 flex items-center justify-between">
+           <div className="flex items-center gap-2 lg:gap-3">
+              <span className="text-xl lg:text-3xl">💌</span>
               <div>
-                <h1 className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-emerald-500 to-sky-500">
+                <h1 className="text-lg lg:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-emerald-500 to-sky-500">
                   The 127 Challenge
                 </h1>
+                <p className="hidden lg:block text-xs text-slate-500">Double your impact with matched donations</p>
               </div>
            </div>
-           <Badge variant="gradient" className="text-[10px] px-2 py-0.5">
-             {isCampaignComplete ? "GOAL REACHED!" : "2X MATCH"}
-           </Badge>
+           <div className="flex items-center gap-3 lg:gap-4">
+             {/* Desktop: Show countdown in header */}
+             <div className="hidden lg:flex items-center gap-2 text-sm">
+               <span className="text-slate-500">Ends in:</span>
+               <span className="font-mono font-bold text-slate-900">{timeLeft.days}d {timeLeft.hours}h {timeLeft.minutes}m</span>
+             </div>
+             <Badge variant="gradient" className="text-[10px] lg:text-xs px-2 lg:px-3 py-0.5 lg:py-1">
+               {isCampaignComplete ? "GOAL REACHED!" : "2X MATCH"}
+             </Badge>
+           </div>
         </div>
       </div>
 
-      <main className="px-5 mt-20 space-y-6">
-        
-        {/* Progress Section */}
-        <section className="space-y-4">
-           <Card className="border-slate-200 bg-white shadow-sm overflow-hidden relative">
-             <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-50 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 opacity-60" />
-             <CardContent className="p-5 relative">
-                <div className="flex justify-between items-baseline mb-2">
-                   <span className="text-sm font-bold text-slate-700">Campaign Progress</span>
-                   <div className="text-right">
-                      <span className="text-emerald-600 font-black font-mono text-lg">{formatCurrency(totalRaised)}</span>
-                      <span className="text-slate-400 text-xs font-medium ml-1">/ {formatCurrency(CONFIG.GOAL_AMOUNT)}</span>
-                   </div>
-                </div>
-                <Progress value={progressPercent} className="h-4 mb-2" />
-                <div className="flex justify-between text-xs text-slate-400 font-medium">
-                  <span>{claimedCount}/127 claimed</span>
-                  <span>{Math.round(progressPercent)}%</span>
-                </div>
-             </CardContent>
-           </Card>
+      <main className="px-5 lg:px-12 xl:px-20 mt-20 lg:mt-24 space-y-6">
 
-           {/* BBB Info */}
-           <Card className="bg-slate-900 text-white border-none shadow-lg">
-              <CardContent className="p-5">
-                <div className="flex gap-3">
-                  <span className="text-2xl pt-1">🤝</span>
-                  <div>
-                    <h3 className="font-bold text-emerald-400 text-sm mb-1">Double Your Impact</h3>
-                    <p className="text-xs text-slate-300 leading-relaxed">
-                      <span className="font-semibold text-white">E3 Partners</span> & <span className="font-semibold text-white">BBB (Businesses Beyond Borders)</span> match every dollar.
-                    </p>
-                    <p className="text-[10px] text-slate-500 mt-2 italic">All gifts 501(c)(3) tax-deductible.</p>
-                  </div>
-                </div>
-              </CardContent>
-           </Card>
+        {/* Desktop: Two-column layout */}
+        <div className="lg:grid lg:grid-cols-12 lg:gap-8">
 
-           {/* Stats Grid */}
-           <div className="grid grid-cols-2 gap-3">
-             <Card className="bg-white p-3 text-center">
-                <p className="text-[10px] uppercase text-slate-400 font-bold mb-1">Deadline</p>
-                <p className="text-lg font-black text-slate-900 font-mono leading-none">{timeLeft.days}d {timeLeft.hours}h</p>
-                <p className="text-[10px] text-slate-400 mt-1">{timeLeft.minutes}m {timeLeft.seconds}s</p>
-             </Card>
-             <Card className="bg-white p-3 text-center flex flex-col justify-center">
-                 <p className="text-[10px] uppercase text-slate-400 font-bold mb-1">Latest Hero</p>
-                 <p className="text-sm font-bold text-slate-800 truncate px-1">{recentDonors[0]?.name || "None"}</p>
-                 <p className="text-xs font-mono text-emerald-600">{recentDonors[0] ? formatCurrency(recentDonors[0].amount) : "-"}</p>
-             </Card>
-           </div>
-        </section>
+          {/* Left Column - Progress & Info (Desktop) / Full width (Mobile) */}
+          <div className="lg:col-span-4 space-y-4 lg:sticky lg:top-24 lg:self-start">
+
+            {/* Progress Section */}
+            <section className="space-y-4">
+               <Card className="border-slate-200 bg-white shadow-sm overflow-hidden relative">
+                 <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-50 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 opacity-60" />
+                 <CardContent className="p-5 lg:p-6 relative">
+                    <div className="flex justify-between items-baseline mb-2">
+                       <span className="text-sm lg:text-base font-bold text-slate-700">Campaign Progress</span>
+                       <div className="text-right">
+                          <span className="text-emerald-600 font-black font-mono text-lg lg:text-xl">{formatCurrency(totalRaised)}</span>
+                          <span className="text-slate-400 text-xs font-medium ml-1">/ {formatCurrency(CONFIG.GOAL_AMOUNT)}</span>
+                       </div>
+                    </div>
+                    <Progress value={progressPercent} className="h-4 lg:h-5 mb-2" />
+                    <div className="flex justify-between text-xs text-slate-400 font-medium">
+                      <span>{claimedCount}/127 claimed</span>
+                      <span>{Math.round(progressPercent)}%</span>
+                    </div>
+                 </CardContent>
+               </Card>
+
+               {/* BBB Info */}
+               <Card className="bg-slate-900 text-white border-none shadow-lg">
+                  <CardContent className="p-5 lg:p-6">
+                    <div className="flex gap-3">
+                      <span className="text-2xl lg:text-3xl pt-1">🤝</span>
+                      <div>
+                        <h3 className="font-bold text-emerald-400 text-sm lg:text-base mb-1">Double Your Impact</h3>
+                        <p className="text-xs lg:text-sm text-slate-300 leading-relaxed">
+                          <span className="font-semibold text-white">E3 Partners</span> & <span className="font-semibold text-white">BBB (Businesses Beyond Borders)</span> match every dollar.
+                        </p>
+                        <p className="text-[10px] lg:text-xs text-slate-500 mt-2 italic">All gifts 501(c)(3) tax-deductible.</p>
+                      </div>
+                    </div>
+                  </CardContent>
+               </Card>
+
+               {/* Stats Grid - Mobile only, desktop shows in header */}
+               <div className="grid grid-cols-2 gap-3 lg:hidden">
+                 <Card className="bg-white p-3 text-center">
+                    <p className="text-[10px] uppercase text-slate-400 font-bold mb-1">Deadline</p>
+                    <p className="text-lg font-black text-slate-900 font-mono leading-none">{timeLeft.days}d {timeLeft.hours}h</p>
+                    <p className="text-[10px] text-slate-400 mt-1">{timeLeft.minutes}m {timeLeft.seconds}s</p>
+                 </Card>
+                 <Card className="bg-white p-3 text-center flex flex-col justify-center">
+                     <p className="text-[10px] uppercase text-slate-400 font-bold mb-1">Latest Hero</p>
+                     <p className="text-sm font-bold text-slate-800 truncate px-1">{recentDonors[0]?.name || "None"}</p>
+                     <p className="text-xs font-mono text-emerald-600">{recentDonors[0] ? formatCurrency(recentDonors[0].amount) : "-"}</p>
+                 </Card>
+               </div>
+
+               {/* Recent Heroes - Desktop sidebar */}
+               <div className="hidden lg:block">
+                 <Card className="bg-white border-slate-200">
+                   <CardHeader className="pb-2">
+                     <CardTitle className="text-sm font-bold text-slate-900">Recent Heroes</CardTitle>
+                   </CardHeader>
+                   <CardContent className="pt-0">
+                     <div className="divide-y divide-slate-100">
+                       {recentDonors.length === 0 ? (
+                         <div className="py-3 text-center text-xs text-slate-400">Be the first to donate!</div>
+                       ) : (
+                         recentDonors.slice(0, 5).map((d, i) => {
+                           const tier = getTierForAmount(d.amount);
+                           return (
+                             <div key={i} className="flex justify-between items-center py-2 text-sm">
+                               <div className="flex items-center gap-2">
+                                 <div className="w-2 h-2 rounded-full" style={{ backgroundColor: tier.solid }} />
+                                 <span className="font-medium text-slate-700 truncate max-w-[120px]">{d.name}</span>
+                               </div>
+                               <span className="font-mono font-bold text-emerald-600 text-xs">{formatCurrency(d.amount)}</span>
+                             </div>
+                           );
+                         })
+                       )}
+                     </div>
+                   </CardContent>
+                 </Card>
+               </div>
+            </section>
+          </div>
+
+          {/* Right Column - Envelopes (Desktop) / Full width (Mobile) */}
+          <div className="lg:col-span-8 mt-6 lg:mt-0">
 
         {/* Filter Section */}
-        <section className="sticky top-[64px] z-30 bg-slate-50/95 py-2 -mx-5 px-5 overflow-hidden">
-           <div className="overflow-x-auto no-scrollbar flex gap-2 pb-2">
+        <section className="sticky top-[64px] lg:top-[80px] z-30 bg-slate-50/95 py-2 -mx-5 px-5 lg:mx-0 lg:px-0 lg:rounded-lg overflow-hidden">
+           <div className="overflow-x-auto no-scrollbar flex gap-2 pb-2 lg:flex-wrap">
              <button
                 onClick={() => setFilter('ALL')}
                 className={cn(
-                  "px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all border",
-                  filter === 'ALL' ? "bg-slate-900 text-white border-slate-900" : "bg-white text-slate-500 border-slate-200"
+                  "px-4 py-1.5 lg:px-5 lg:py-2 rounded-full text-xs lg:text-sm font-bold whitespace-nowrap transition-all border",
+                  filter === 'ALL' ? "bg-slate-900 text-white border-slate-900" : "bg-white text-slate-500 border-slate-200 hover:border-slate-400"
                 )}
               >
                 View All
@@ -262,8 +312,8 @@ const App: React.FC = () => {
                   key={tier.label}
                   onClick={() => setFilter(tier.label)}
                   className={cn(
-                    "px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all border",
-                    filter === tier.label ? "bg-slate-900 text-white border-slate-900" : "bg-white text-slate-500 border-slate-200"
+                    "px-4 py-1.5 lg:px-5 lg:py-2 rounded-full text-xs lg:text-sm font-bold whitespace-nowrap transition-all border",
+                    filter === tier.label ? "bg-slate-900 text-white border-slate-900" : "bg-white text-slate-500 border-slate-200 hover:border-slate-400"
                   )}
                 >
                   ${tier.min}-{tier.max}
@@ -272,8 +322,8 @@ const App: React.FC = () => {
            </div>
         </section>
 
-        {/* Envelope Grid - CSS ClipPath Based */}
-        <section className="grid grid-cols-3 gap-3">
+        {/* Envelope Grid - Responsive columns */}
+        <section className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10 gap-3 lg:gap-4">
           <AnimatePresence mode="popLayout">
             {filteredEnvelopes.map((env) => {
               const isSelected = selectedIds.includes(env.id);
@@ -304,8 +354,8 @@ const App: React.FC = () => {
           </AnimatePresence>
         </section>
 
-        {/* Recent Heroes List */}
-        <section className="pt-4 pb-8">
+        {/* Recent Heroes List - Mobile only */}
+        <section className="pt-4 pb-8 lg:hidden">
             <h3 className="text-sm font-bold text-slate-900 mb-3 px-1">Recent Heroes</h3>
             <div className="bg-white rounded-xl border border-slate-200 divide-y divide-slate-100">
                 {recentDonors.length === 0 ? (
@@ -327,6 +377,8 @@ const App: React.FC = () => {
             </div>
         </section>
 
+          </div>{/* End Right Column */}
+        </div>{/* End Two-column layout */}
       </main>
 
       {/* Sticky Footer */}
@@ -336,16 +388,17 @@ const App: React.FC = () => {
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
-            className="fixed bottom-0 left-0 right-0 mx-auto max-w-[420px] z-50 bg-white border-t border-slate-200 shadow-xl px-5 py-3 pb-[calc(12px+env(safe-area-inset-bottom))]"
+            className="fixed bottom-0 left-0 right-0 mx-auto max-w-[420px] lg:max-w-none z-50 bg-white border-t border-slate-200 shadow-xl px-5 lg:px-12 xl:px-20 py-3 lg:py-4 safe-area-pb"
           >
             <div className="flex items-center justify-between gap-4">
-              <div className="flex flex-col">
-                 <span className="text-xs text-slate-500 font-bold uppercase tracking-wider">{selectedCount} Selected</span>
-                 <span className="text-2xl font-black text-slate-900 leading-none">{formatCurrency(selectedTotal)}</span>
+              <div className="flex flex-col lg:flex-row lg:items-center lg:gap-6">
+                 <span className="text-xs lg:text-sm text-slate-500 font-bold uppercase tracking-wider">{selectedCount} Selected</span>
+                 <span className="text-2xl lg:text-3xl font-black text-slate-900 leading-none">{formatCurrency(selectedTotal)}</span>
+                 <span className="hidden lg:block text-sm text-emerald-600 font-semibold">→ Becomes {formatCurrency(selectedTotal * CONFIG.MATCH_MULTIPLIER)} with match!</span>
               </div>
-              <Button 
-                onClick={handleProceedToDonate} 
-                className="h-12 px-6 text-base bg-slate-900 hover:bg-slate-800 text-white rounded-xl shadow-lg"
+              <Button
+                onClick={handleProceedToDonate}
+                className="h-12 lg:h-14 px-6 lg:px-10 text-base lg:text-lg bg-slate-900 hover:bg-slate-800 text-white rounded-xl shadow-lg"
               >
                 Donate Now
               </Button>

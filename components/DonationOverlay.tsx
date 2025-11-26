@@ -52,9 +52,9 @@ export const DonationOverlay: React.FC<DonationOverlayProps> = ({ envelope, onCl
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      style={{ touchAction: 'none' }}
+      style={{ touchAction: 'none', WebkitBackdropFilter: 'blur(12px)', backdropFilter: 'blur(12px)' }}
     >
-      <div className="relative w-full max-w-[420px] h-[100dvh] flex flex-col items-center justify-center overflow-hidden">
+      <div className="relative w-full max-w-[420px] lg:max-w-2xl h-screen flex flex-col items-center justify-center overflow-hidden" style={{ height: '100dvh', minHeight: '-webkit-fill-available' }}>
         
         {/* Close Button */}
         <button 
@@ -66,7 +66,7 @@ export const DonationOverlay: React.FC<DonationOverlayProps> = ({ envelope, onCl
 
         {/* Envelope Animation Container */}
         <motion.div
-          className="relative z-20 w-56 md:w-64 shrink-0"
+          className="relative z-20 w-56 md:w-64 lg:w-72 shrink-0"
           initial={{ scale: 0.5, y: 100, opacity: 0 }}
           animate={{ 
             scale: animationStage >= 3 ? 0.6 : 1, 
@@ -85,7 +85,7 @@ export const DonationOverlay: React.FC<DonationOverlayProps> = ({ envelope, onCl
 
         {/* Form Container */}
         <motion.div
-            className="absolute z-30 w-[92%] max-w-[380px] bg-white rounded-xl shadow-2xl overflow-hidden flex flex-col"
+            className="absolute z-30 w-[92%] max-w-[380px] lg:max-w-[500px] bg-white rounded-xl shadow-2xl overflow-hidden flex flex-col"
             initial={{ y: 100, height: 0, opacity: 0 }}
             animate={{ 
               y: animationStage === 3 ? 0 : 100,

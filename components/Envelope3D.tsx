@@ -68,33 +68,46 @@ export const Envelope3D: React.FC<Envelope3DProps> = ({ amount, isClaimed, isOpe
         </div>
 
         {/* 4. The Flap Container - 3D Context Isolated Here */}
-        <div className="absolute top-0 left-0 right-0 h-[35%] z-30 perspective-1000">
+        <div
+          className="absolute top-0 left-0 right-0 h-[35%] z-30 perspective-1000"
+          style={{
+            WebkitPerspective: '1000px',
+            perspective: '1000px'
+          }}
+        >
           <motion.div
             className="w-full h-full origin-top transform-style-3d"
             variants={flapVariants}
             initial="closed"
             animate={isOpen ? "open" : "closed"}
-            style={{ willChange: 'transform' }}
+            style={{
+              willChange: 'transform',
+              WebkitTransformStyle: 'preserve-3d',
+              transformStyle: 'preserve-3d'
+            }}
           >
             {/* Front of Flap (Closed state) */}
-            <div 
+            <div
               className="absolute inset-0"
-              style={{ 
+              style={{
                 backgroundColor: tier?.solid || '#10b981',
                 backgroundImage: tier?.gradient,
                 backgroundSize: 'cover',
                 clipPath: 'polygon(0% 0%, 100% 0%, 50% 100%)',
                 WebkitClipPath: 'polygon(0% 0%, 100% 0%, 50% 100%)',
                 backfaceVisibility: 'hidden',
-                WebkitBackfaceVisibility: 'hidden'
+                WebkitBackfaceVisibility: 'hidden',
+                transform: 'translateZ(1px)', // Safari fix: force stacking context
+                WebkitTransform: 'translateZ(1px)'
               }}
             />
-            
+
             {/* Back of Flap (Visible when open) */}
-            <div 
+            <div
                className="absolute inset-0 bg-white/95 border-t border-slate-100"
-               style={{ 
-                 transform: 'rotateY(180deg)',
+               style={{
+                 transform: 'rotateX(180deg) translateZ(0px)',
+                 WebkitTransform: 'rotateX(180deg) translateZ(0px)',
                  clipPath: 'polygon(0% 0%, 100% 0%, 50% 100%)',
                  WebkitClipPath: 'polygon(0% 0%, 100% 0%, 50% 100%)',
                  backfaceVisibility: 'hidden',

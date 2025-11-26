@@ -52,8 +52,19 @@
         margin: 0;
         padding: 0;
         min-height: 100vh;
-        /* Mobile safe area handling */
+        /* Mobile safe area handling - iOS 11.0-11.2 fallback */
+        padding-bottom: constant(safe-area-inset-bottom);
         padding-bottom: env(safe-area-inset-bottom);
+      }
+      /* Safe area padding utility for Safari/iOS */
+      .safe-area-pb {
+        padding-bottom: calc(12px + constant(safe-area-inset-bottom));
+        padding-bottom: calc(12px + env(safe-area-inset-bottom));
+      }
+      /* Safari sticky position fix */
+      .sticky {
+        position: -webkit-sticky;
+        position: sticky;
       }
       #root {
         width: 100%;
@@ -61,14 +72,25 @@
         overflow-x: hidden;
       }
       .perspective-1000 {
+        -webkit-perspective: 1000px;
         perspective: 1000px;
       }
       .transform-style-3d {
+        -webkit-transform-style: preserve-3d;
         transform-style: preserve-3d;
       }
       .backface-hidden {
-        backface-visibility: hidden;
         -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+      }
+      /* Safari-specific backdrop-filter fix */
+      .backdrop-blur-sm, .backdrop-blur-md {
+        -webkit-backdrop-filter: blur(4px);
+        backdrop-filter: blur(4px);
+      }
+      .backdrop-blur-md {
+        -webkit-backdrop-filter: blur(12px);
+        backdrop-filter: blur(12px);
       }
       .no-scrollbar::-webkit-scrollbar {
         display: none;
@@ -77,22 +99,55 @@
         -ms-overflow-style: none;
         scrollbar-width: none;
       }
+      /* Safari-compatible animation keyframes */
+      @-webkit-keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+      @-webkit-keyframes slideInFromBottom {
+        from { -webkit-transform: translateY(1rem); transform: translateY(1rem); }
+        to { -webkit-transform: translateY(0); transform: translateY(0); }
+      }
+      @keyframes slideInFromBottom {
+        from { transform: translateY(1rem); }
+        to { transform: translateY(0); }
+      }
+      @-webkit-keyframes zoomIn {
+        from { -webkit-transform: scale(0.95); transform: scale(0.95); }
+        to { -webkit-transform: scale(1); transform: scale(1); }
+      }
+      @keyframes zoomIn {
+        from { transform: scale(0.95); }
+        to { transform: scale(1); }
+      }
+      .animate-in {
+        -webkit-animation-fill-mode: both;
+        animation-fill-mode: both;
+      }
+      .fade-in {
+        -webkit-animation-name: fadeIn;
+        animation-name: fadeIn;
+      }
+      .slide-in-from-bottom-4 {
+        -webkit-animation-name: slideInFromBottom;
+        animation-name: slideInFromBottom;
+      }
+      .zoom-in-95 {
+        -webkit-animation-name: zoomIn;
+        animation-name: zoomIn;
+      }
+      .duration-500 {
+        -webkit-animation-duration: 500ms;
+        animation-duration: 500ms;
+      }
     </style>
-  <script type="importmap">
-{
-  "imports": {
-    "react": "https://aistudiocdn.com/react@^19.2.0",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
-    "react/": "https://aistudiocdn.com/react@^19.2.0/",
-    "tailwind-merge": "https://aistudiocdn.com/tailwind-merge@^3.4.0",
-    "framer-motion": "https://aistudiocdn.com/framer-motion@^12.23.24",
-    "clsx": "https://aistudiocdn.com/clsx@^2.1.1",
-    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2"
-  }
-}
-</script>
 </head>
   <body>
     <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
   </body>
 </html>
