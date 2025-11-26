@@ -245,7 +245,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-emerald-500/30 pb-24">
+    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-emerald-500/30 pb-24 overflow-x-hidden w-full">
       
       {/* --- Sticky Header --- */}
       <div className="sticky top-0 z-40 w-full bg-white/80 backdrop-blur-md border-b border-slate-200 shadow-sm">
@@ -265,7 +265,7 @@ const App: React.FC = () => {
         </div>
       </div>
 
-      <main className="max-w-7xl mx-auto px-3 sm:px-4 py-6 md:py-8 space-y-8 md:space-y-12">
+      <main className="max-w-7xl mx-auto px-4 py-6 md:py-8 space-y-8 md:space-y-12">
 
         {/* --- Hero & Stats Section --- */}
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -477,7 +477,7 @@ const App: React.FC = () => {
             initial={{ y: 100 }}
             animate={{ y: 0 }}
             exit={{ y: 100 }}
-            className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-slate-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] px-4 py-4"
+            className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-slate-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] px-4 py-4 pb-[calc(1rem+env(safe-area-inset-bottom))]"
           >
             <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
               <div className="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-3">

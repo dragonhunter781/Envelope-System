@@ -2,12 +2,11 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>The 127 Envelope Challenge</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <script src="https://donorbox.org/widget.js" paypalExpress="true"></script>
     <script>
       tailwind.config = {
         darkMode: 'class',
@@ -38,6 +37,11 @@
       }
     </script>
     <style>
+      html, body {
+        overflow-x: hidden;
+        width: 100%;
+        position: relative;
+      }
       body {
         background-color: #f8fafc;
         color: #0f172a;
@@ -72,7 +76,7 @@
     "tailwind-merge": "https://aistudiocdn.com/tailwind-merge@^3.4.0",
     "framer-motion": "https://aistudiocdn.com/framer-motion@^12.23.24",
     "clsx": "https://aistudiocdn.com/clsx@^2.1.1",
-    "@supabase/supabase-js": "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm"
+    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2"
   }
 }
 </script>
