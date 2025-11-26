@@ -14,35 +14,18 @@ interface Envelope3DProps {
 export const Envelope3D: React.FC<Envelope3DProps> = ({ amount, isClaimed, isOpen, showContent, className }) => {
   const tier = getTierForAmount(amount);
 
-  // Animation variants for the flap
+  // Animation variants for the flap - realistic envelope opening
+  // Flap rotates backward from its bottom edge (where it attaches to envelope)
   const flapVariants: Variants = {
     closed: {
-      scaleY: 1,
-      y: 0,
+      rotateX: 0,
       zIndex: 30,
-      transition: { duration: 0.4, ease: "easeInOut" }
+      transition: { duration: 0.5, ease: "easeInOut" }
     },
     open: {
-      scaleY: -1,
-      y: '-100%',
-      zIndex: 1,
-      transition: { duration: 0.5, ease: "easeOut" }
-    }
-  };
-
-  // Back of flap (white) variants - only visible when open
-  const flapBackVariants: Variants = {
-    closed: {
-      opacity: 0,
-      scaleY: -1,
-      y: '100%',
-      transition: { duration: 0.4, ease: "easeInOut" }
-    },
-    open: {
-      opacity: 1,
-      scaleY: 1,
-      y: 0,
-      transition: { duration: 0.5, ease: "easeOut" }
+      rotateX: -180,
+      zIndex: 10,
+      transition: { duration: 0.6, ease: [0.4, 0, 0.2, 1] }
     }
   };
 
@@ -85,48 +68,53 @@ export const Envelope3D: React.FC<Envelope3DProps> = ({ amount, isClaimed, isOpe
              </div>
         </div>
 
-        {/* 4a. Front of Flap (colored) - visible when closed, hides when open */}
-        <motion.div
+        {/* 4. The Flap Container with 3D perspective */}
+        <div
           className="absolute top-0 left-0 right-0 h-[35%] z-30"
-          variants={flapVariants}
-          initial="closed"
-          animate={isOpen ? "open" : "closed"}
           style={{
-            transformOrigin: 'center bottom',
-            WebkitTransformOrigin: 'center bottom'
+            perspective: '800px',
+            WebkitPerspective: '800px'
           }}
         >
-          <div
-            className="absolute inset-0"
+          <motion.div
+            className="w-full h-full relative"
+            variants={flapVariants}
+            initial="closed"
+            animate={isOpen ? "open" : "closed"}
             style={{
-              backgroundColor: tier?.solid || '#10b981',
-              backgroundImage: tier?.gradient,
-              backgroundSize: 'cover',
-              clipPath: 'polygon(0% 0%, 100% 0%, 50% 100%)',
-              WebkitClipPath: 'polygon(0% 0%, 100% 0%, 50% 100%)'
+              transformStyle: 'preserve-3d',
+              WebkitTransformStyle: 'preserve-3d',
+              transformOrigin: 'center bottom',
+              WebkitTransformOrigin: 'center bottom'
             }}
-          />
-        </motion.div>
-
-        {/* 4b. Back of Flap (white) - hidden when closed, visible when open */}
-        <motion.div
-          className="absolute -top-[35%] left-0 right-0 h-[35%] z-20"
-          variants={flapBackVariants}
-          initial="closed"
-          animate={isOpen ? "open" : "closed"}
-          style={{
-            transformOrigin: 'center bottom',
-            WebkitTransformOrigin: 'center bottom'
-          }}
-        >
-          <div
-            className="absolute inset-0 bg-white border border-slate-200"
-            style={{
-              clipPath: 'polygon(0% 100%, 50% 0%, 100% 100%)',
-              WebkitClipPath: 'polygon(0% 100%, 50% 0%, 100% 100%)'
-            }}
-          />
-        </motion.div>
+          >
+            {/* Front of Flap (colored) - visible when closed */}
+            <div
+              className="absolute inset-0"
+              style={{
+                backgroundColor: tier?.solid || '#10b981',
+                backgroundImage: tier?.gradient,
+                backgroundSize: 'cover',
+                clipPath: 'polygon(0% 0%, 100% 0%, 50% 100%)',
+                WebkitClipPath: 'polygon(0% 0%, 100% 0%, 50% 100%)',
+                backfaceVisibility: 'hidden',
+                WebkitBackfaceVisibility: 'hidden'
+              }}
+            />
+            {/* Back of Flap (white) - visible when open */}
+            <div
+              className="absolute inset-0 bg-white"
+              style={{
+                clipPath: 'polygon(0% 0%, 100% 0%, 50% 100%)',
+                WebkitClipPath: 'polygon(0% 0%, 100% 0%, 50% 100%)',
+                backfaceVisibility: 'hidden',
+                WebkitBackfaceVisibility: 'hidden',
+                transform: 'rotateX(180deg)',
+                WebkitTransform: 'rotateX(180deg)'
+              }}
+            />
+          </motion.div>
+        </div>
 
       </div>
     </div>

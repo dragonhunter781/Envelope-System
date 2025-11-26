@@ -60,17 +60,27 @@ export const ShareModal: React.FC<ShareModalProps> = ({ onClose, data }) => {
 
   if (!data) return null;
 
+  const isPersonalized = data.amount > 0 && data.name;
   const impactAmount = data.amount * CONFIG.MATCH_MULTIPLIER;
   const shareUrl = typeof window !== 'undefined' ? window.location.href : 'https://example.com';
 
-  // Optimized share text for social media - Updated for BBB
-  const shareText = `I just gave ${formatCurrency(data.amount)} to Businesses Beyond Borders through The 127 Envelope Challenge and it's being DOUBLED to ${formatCurrency(impactAmount)}! Only a few days left - join me in making an impact!`;
+  // Personalized share text (for donors)
+  const personalizedShareText = `I just gave ${formatCurrency(data.amount)} to Businesses Beyond Borders through The 127 Envelope Challenge and it's being DOUBLED to ${formatCurrency(impactAmount)}! Only a few days left - join me in making an impact!`;
 
-  // Shorter text for Twitter/X
-  const twitterText = `Just donated to @BBB_org through The 127 Envelope Challenge - my ${formatCurrency(data.amount)} gift is being DOUBLED! Join me:`;
+  // General share text (for everyone)
+  const generalShareText = `Check out The 127 Envelope Challenge! Every donation to Businesses Beyond Borders is being DOUBLED right now. Only a few days left to make your gift go 2X!`;
 
-  // WhatsApp/SMS text - Updated for BBB
-  const messageText = `Hey! I just donated ${formatCurrency(data.amount)} to Businesses Beyond Borders (a 501c3) through The 127 Envelope Challenge and it's being matched 2X! We only have a few days left to reach the goal. Would you consider joining me? Every dollar is doubled! ${shareUrl}`;
+  const shareText = isPersonalized ? personalizedShareText : generalShareText;
+
+  // Twitter/X text
+  const twitterText = isPersonalized
+    ? `Just donated to @BBB_org through The 127 Envelope Challenge - my ${formatCurrency(data.amount)} gift is being DOUBLED! Join me:`
+    : `Every donation is being DOUBLED! Check out The 127 Envelope Challenge for @BBB_org - make your gift go 2X:`;
+
+  // WhatsApp/SMS text
+  const messageText = isPersonalized
+    ? `Hey! I just donated ${formatCurrency(data.amount)} to Businesses Beyond Borders (a 501c3) through The 127 Envelope Challenge and it's being matched 2X! We only have a few days left to reach the goal. Would you consider joining me? Every dollar is doubled! ${shareUrl}`
+    : `Hey! Have you seen The 127 Envelope Challenge? Every donation to Businesses Beyond Borders (a 501c3) is being DOUBLED right now! Only a few days left. Check it out: ${shareUrl}`;
 
   const handleShare = async () => {
     if (navigator.share) {
@@ -161,46 +171,73 @@ export const ShareModal: React.FC<ShareModalProps> = ({ onClose, data }) => {
 
           <CardHeader className="text-center pb-2 pt-6">
             <CardTitle className="text-2xl lg:text-3xl font-black text-slate-900">
-              You're Amazing, {data.name}!
+              {isPersonalized ? `You're Amazing, ${data.name}!` : 'Share This Campaign!'}
             </CardTitle>
-            <p className="text-slate-500 text-sm mt-1">Your generosity is making a real difference</p>
+            <p className="text-slate-500 text-sm mt-1">
+              {isPersonalized ? 'Your generosity is making a real difference' : 'Help us reach more people with this matching opportunity'}
+            </p>
           </CardHeader>
 
           <CardContent className="space-y-6 text-center px-6 lg:px-8 pb-8">
-            {/* Impact Display */}
+            {/* Impact Display - Personalized or General */}
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.2 }}
               className="bg-gradient-to-br from-slate-50 to-emerald-50 rounded-xl p-5 border border-emerald-100"
             >
-              <div className="flex items-center justify-center gap-3 mb-3">
-                <div className="text-center">
-                  <p className="text-xs text-slate-400 uppercase font-bold mb-1">Your Gift</p>
-                  <p className="text-2xl font-black text-slate-700">{formatCurrency(data.amount)}</p>
-                </div>
-                <motion.div
-                  animate={{ scale: [1, 1.2, 1] }}
-                  transition={{ repeat: Infinity, duration: 1.5 }}
-                  className="text-2xl font-black text-emerald-500"
-                >
-                  ×2
-                </motion.div>
-                <div className="text-center">
-                  <p className="text-xs text-slate-400 uppercase font-bold mb-1">Total Impact</p>
-                  <p className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-sky-500">
-                    {formatCurrency(impactAmount)}
-                  </p>
-                </div>
-              </div>
-              <div className="pt-2 border-t border-emerald-100 mt-3">
-                <p className="text-xs text-slate-500 font-medium">
-                  Donated to <span className="font-bold text-slate-700">Businesses Beyond Borders</span>
-                </p>
-                <p className="text-[10px] text-slate-400 mt-1">
-                  501(c)(3) Tax-Deductible • EIN: Available on receipt
-                </p>
-              </div>
+              {isPersonalized ? (
+                <>
+                  <div className="flex items-center justify-center gap-3 mb-3">
+                    <div className="text-center">
+                      <p className="text-xs text-slate-400 uppercase font-bold mb-1">Your Gift</p>
+                      <p className="text-2xl font-black text-slate-700">{formatCurrency(data.amount)}</p>
+                    </div>
+                    <motion.div
+                      animate={{ scale: [1, 1.2, 1] }}
+                      transition={{ repeat: Infinity, duration: 1.5 }}
+                      className="text-2xl font-black text-emerald-500"
+                    >
+                      ×2
+                    </motion.div>
+                    <div className="text-center">
+                      <p className="text-xs text-slate-400 uppercase font-bold mb-1">Total Impact</p>
+                      <p className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-sky-500">
+                        {formatCurrency(impactAmount)}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="pt-2 border-t border-emerald-100 mt-3">
+                    <p className="text-xs text-slate-500 font-medium">
+                      Donated to <span className="font-bold text-slate-700">Businesses Beyond Borders</span>
+                    </p>
+                    <p className="text-[10px] text-slate-400 mt-1">
+                      501(c)(3) Tax-Deductible • EIN: Available on receipt
+                    </p>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="text-center mb-3">
+                    <motion.p
+                      animate={{ scale: [1, 1.05, 1] }}
+                      transition={{ repeat: Infinity, duration: 2 }}
+                      className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-sky-500"
+                    >
+                      Every Gift = 2X Impact
+                    </motion.p>
+                    <p className="text-sm text-slate-600 mt-2">All donations are being matched!</p>
+                  </div>
+                  <div className="pt-2 border-t border-emerald-100 mt-3">
+                    <p className="text-xs text-slate-500 font-medium">
+                      Supporting <span className="font-bold text-slate-700">Businesses Beyond Borders</span>
+                    </p>
+                    <p className="text-[10px] text-slate-400 mt-1">
+                      501(c)(3) Tax-Deductible Organization
+                    </p>
+                  </div>
+                </>
+              )}
             </motion.div>
 
             {/* Share CTA */}

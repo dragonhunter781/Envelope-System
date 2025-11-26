@@ -241,11 +241,15 @@ const App: React.FC = () => {
     await db.claimEnvelopes(idsToClaim, name, email);
   };
 
-  // Allow verified donors to share their impact
-  const handleShareExisting = useCallback(() => {
+  // Share handler - personalized for donors, general for everyone else
+  const handleShareGeneral = useCallback(() => {
     if (verifiedDonor) {
+      // Personalized share for verified donors
       setShareData({ amount: verifiedDonor.amount, name: verifiedDonor.name });
       fireConfetti();
+    } else {
+      // General campaign share for everyone else
+      setShareData({ amount: 0, name: '' }); // 0 amount triggers general share mode
     }
   }, [verifiedDonor]);
 
@@ -351,34 +355,41 @@ const App: React.FC = () => {
                  </Card>
                </motion.div>
 
-               {/* Share Button for Verified Donors Only */}
-               {verifiedDonor && (
-                 <motion.div
-                   initial={{ opacity: 0, scale: 0.95 }}
-                   animate={{ opacity: 1, scale: 1 }}
-                   transition={{ delay: 0.4 }}
-                 >
-                   <Card className="bg-gradient-to-r from-sky-500 to-emerald-500 text-white border-none shadow-lg overflow-hidden">
-                     <CardContent className="p-4 lg:p-5">
-                       <div className="flex items-center justify-between gap-3">
-                         <div className="flex items-center gap-3">
-                           <span className="text-2xl">🎉</span>
-                           <div>
-                             <p className="font-bold text-sm lg:text-base">Welcome back, {verifiedDonor.name}!</p>
-                             <p className="text-xs lg:text-sm text-white/80">Share your {formatCurrency(verifiedDonor.amount)} gift with friends!</p>
-                           </div>
+               {/* Share Button - Personalized for donors, general for everyone else */}
+               <motion.div
+                 initial={{ opacity: 0, scale: 0.95 }}
+                 animate={{ opacity: 1, scale: 1 }}
+                 transition={{ delay: 0.4 }}
+               >
+                 <Card className={`${verifiedDonor ? 'bg-gradient-to-r from-sky-500 to-emerald-500' : 'bg-gradient-to-r from-violet-500 to-pink-500'} text-white border-none shadow-lg overflow-hidden`}>
+                   <CardContent className="p-4 lg:p-5">
+                     <div className="flex items-center justify-between gap-3">
+                       <div className="flex items-center gap-3">
+                         <span className="text-2xl">{verifiedDonor ? '🎉' : '📣'}</span>
+                         <div>
+                           {verifiedDonor ? (
+                             <>
+                               <p className="font-bold text-sm lg:text-base">Welcome back, {verifiedDonor.name}!</p>
+                               <p className="text-xs lg:text-sm text-white/80">Share your {formatCurrency(verifiedDonor.amount)} impact!</p>
+                             </>
+                           ) : (
+                             <>
+                               <p className="font-bold text-sm lg:text-base">Help us spread the word!</p>
+                               <p className="text-xs lg:text-sm text-white/80">Share this 2X matching campaign</p>
+                             </>
+                           )}
                          </div>
-                         <Button
-                           onClick={handleShareExisting}
-                           className="bg-white text-slate-900 hover:bg-slate-100 font-bold px-4 lg:px-6 h-10 lg:h-12 rounded-full shadow-lg"
-                         >
-                           Share Now
-                         </Button>
                        </div>
-                     </CardContent>
-                   </Card>
-                 </motion.div>
-               )}
+                       <Button
+                         onClick={handleShareGeneral}
+                         className="bg-white text-slate-900 hover:bg-slate-100 font-bold px-4 lg:px-6 h-10 lg:h-12 rounded-full shadow-lg"
+                       >
+                         Share
+                       </Button>
+                     </div>
+                   </CardContent>
+                 </Card>
+               </motion.div>
 
                {/* Stats Grid - Mobile only, desktop shows in header */}
                <div className="grid grid-cols-2 gap-3 lg:hidden">
