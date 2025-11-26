@@ -14,16 +14,16 @@ interface Envelope3DProps {
 export const Envelope3D: React.FC<Envelope3DProps> = ({ amount, isClaimed, isOpen, showContent, className }) => {
   const tier = getTierForAmount(amount);
 
-  // Animation variants for the flap
+  // Animation variants for the flap - rotates backward (negative) to open correctly
   const flapVariants: Variants = {
-    closed: { 
-      rotateX: 0, 
+    closed: {
+      rotateX: 0,
       zIndex: 30,
       transition: { duration: 0.5, ease: "easeInOut" }
     },
-    open: { 
-      rotateX: 180, 
-      zIndex: 1, 
+    open: {
+      rotateX: -180,
+      zIndex: 1,
       transition: { duration: 0.6, ease: "easeInOut" }
     }
   };
@@ -106,8 +106,8 @@ export const Envelope3D: React.FC<Envelope3DProps> = ({ amount, isClaimed, isOpe
             <div
                className="absolute inset-0 bg-white/95 border-t border-slate-100"
                style={{
-                 transform: 'rotateX(180deg) translateZ(0px)',
-                 WebkitTransform: 'rotateX(180deg) translateZ(0px)',
+                 transform: 'rotateX(-180deg) translateZ(0px)',
+                 WebkitTransform: 'rotateX(-180deg) translateZ(0px)',
                  clipPath: 'polygon(0% 0%, 100% 0%, 50% 100%)',
                  WebkitClipPath: 'polygon(0% 0%, 100% 0%, 50% 100%)',
                  backfaceVisibility: 'hidden',

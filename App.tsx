@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { EnvelopeData, Donor, Tier, StorageData } from './types';
 import { CONFIG, TIERS, getTierForAmount } from './constants';
@@ -16,14 +16,58 @@ declare global {
   }
 }
 
+// Enhanced confetti burst for desktop
+const fireConfetti = () => {
+  if (!window.confetti) return;
+
+  // Center burst
+  window.confetti({
+    particleCount: 100,
+    spread: 70,
+    origin: { y: 0.6 },
+    colors: ['#10b981', '#3b82f6', '#f59e0b', '#ec4899', '#8b5cf6']
+  });
+
+  // Side cannons for desktop
+  if (window.innerWidth > 768) {
+    setTimeout(() => {
+      window.confetti({
+        particleCount: 50,
+        angle: 60,
+        spread: 55,
+        origin: { x: 0 },
+        colors: ['#10b981', '#3b82f6', '#f59e0b']
+      });
+      window.confetti({
+        particleCount: 50,
+        angle: 120,
+        spread: 55,
+        origin: { x: 1 },
+        colors: ['#ec4899', '#8b5cf6', '#10b981']
+      });
+    }, 150);
+
+    // Extra sparkle burst
+    setTimeout(() => {
+      window.confetti({
+        particleCount: 30,
+        spread: 100,
+        origin: { y: 0.3 },
+        colors: ['#ffd700', '#ffec8b', '#fff8dc']
+      });
+    }, 300);
+  }
+};
+
 const App: React.FC = () => {
   const [data, setData] = useState<StorageData>(getInitialData());
-  const [selectedIds, setSelectedIds] = useState<number[]>([]); 
-  const [donatingEnvelope, setDonatingEnvelope] = useState<EnvelopeData | null>(null); 
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [donatingEnvelope, setDonatingEnvelope] = useState<EnvelopeData | null>(null);
   const [shareData, setShareData] = useState<{ amount: number, name: string } | null>(null);
   const [filter, setFilter] = useState<Tier>('ALL');
   const [timeLeft, setTimeLeft] = useState<{ days: number; hours: number; minutes: number; seconds: number }>({ days: 0, hours: 0, minutes: 0, seconds: 0 });
   const [showCompletionModal, setShowCompletionModal] = useState(false);
+  const [showSharePrompt, setShowSharePrompt] = useState(false);
 
   // Recalculate totals immediately based on data state
   const envelopes = Object.values(data.envelopes) as EnvelopeData[];
@@ -165,12 +209,22 @@ const App: React.FC = () => {
     setDonatingEnvelope(null);
     setSelectedIds([]);
 
-    if (!isCampaignComplete && window.confetti) {
-      window.confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#10b981', '#3b82f6', '#f59e0b', '#ec4899'] });
+    // Fire enhanced confetti celebration
+    if (!isCampaignComplete) {
+      fireConfetti();
     }
     setShareData({ amount: currentAmount, name });
     await db.claimEnvelopes(idsToClaim, name, email);
   };
+
+  // Allow existing donors to share
+  const handleShareExisting = useCallback(() => {
+    const lastDonor = recentDonors[0];
+    if (lastDonor) {
+      setShareData({ amount: lastDonor.amount, name: lastDonor.name });
+      fireConfetti();
+    }
+  }, [recentDonors]);
 
   return (
     <div className="w-full max-w-[420px] lg:max-w-none mx-auto min-h-screen bg-slate-50 text-slate-900 font-sans pb-32 overflow-x-hidden lg:shadow-none lg:border-x-0 shadow-2xl border-x border-slate-100/50">
@@ -231,21 +285,77 @@ const App: React.FC = () => {
                  </CardContent>
                </Card>
 
-               {/* BBB Info */}
-               <Card className="bg-slate-900 text-white border-none shadow-lg">
-                  <CardContent className="p-5 lg:p-6">
-                    <div className="flex gap-3">
-                      <span className="text-2xl lg:text-3xl pt-1">🤝</span>
-                      <div>
-                        <h3 className="font-bold text-emerald-400 text-sm lg:text-base mb-1">Double Your Impact</h3>
-                        <p className="text-xs lg:text-sm text-slate-300 leading-relaxed">
-                          <span className="font-semibold text-white">E3 Partners</span> & <span className="font-semibold text-white">BBB (Businesses Beyond Borders)</span> match every dollar.
-                        </p>
-                        <p className="text-[10px] lg:text-xs text-slate-500 mt-2 italic">All gifts 501(c)(3) tax-deductible.</p>
+               {/* BBB Info - Updated messaging */}
+               <motion.div
+                 initial={{ opacity: 0, y: 20 }}
+                 animate={{ opacity: 1, y: 0 }}
+                 transition={{ delay: 0.2 }}
+               >
+                 <Card className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white border-none shadow-xl overflow-hidden relative">
+                    {/* Animated background glow */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 via-transparent to-sky-500/10 animate-pulse" />
+
+                    <CardContent className="p-5 lg:p-6 relative">
+                      <div className="flex gap-4">
+                        <motion.span
+                          className="text-3xl lg:text-4xl"
+                          animate={{ scale: [1, 1.1, 1] }}
+                          transition={{ repeat: Infinity, duration: 2 }}
+                        >
+                          🤝
+                        </motion.span>
+                        <div className="space-y-2">
+                          <h3 className="font-black text-emerald-400 text-base lg:text-lg">Together, We Can Double Every Gift!</h3>
+                          <p className="text-sm lg:text-base text-slate-200 leading-relaxed">
+                            <span className="font-bold text-white">E3 Partners</span> has joined forces with <span className="font-bold text-white">Businesses Beyond Borders</span> to create a matching fund that <span className="text-emerald-400 font-semibold">doubles every donation</span>.
+                          </p>
+                          <div className="bg-amber-500/20 border border-amber-500/30 rounded-lg p-3 mt-3">
+                            <p className="text-sm text-amber-200 font-medium flex items-center gap-2">
+                              <span className="text-lg">⏰</span>
+                              <span>Only <strong className="text-white">{timeLeft.days} days</strong> left! We need your help to reach our goal.</span>
+                            </p>
+                          </div>
+                          <p className="text-sm text-slate-300 mt-2">
+                            🙏 Please pray about partnering with us in this mission.
+                          </p>
+                          <p className="text-xs text-slate-400 mt-2 flex items-center gap-1">
+                            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
+                            Every gift is tax-deductible (501c3)
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  </CardContent>
-               </Card>
+                    </CardContent>
+                 </Card>
+               </motion.div>
+
+               {/* Share Button for Returning Donors */}
+               {recentDonors.length > 0 && (
+                 <motion.div
+                   initial={{ opacity: 0, scale: 0.95 }}
+                   animate={{ opacity: 1, scale: 1 }}
+                   transition={{ delay: 0.4 }}
+                 >
+                   <Card className="bg-gradient-to-r from-sky-500 to-emerald-500 text-white border-none shadow-lg overflow-hidden">
+                     <CardContent className="p-4 lg:p-5">
+                       <div className="flex items-center justify-between gap-3">
+                         <div className="flex items-center gap-3">
+                           <span className="text-2xl">🎉</span>
+                           <div>
+                             <p className="font-bold text-sm lg:text-base">Already donated?</p>
+                             <p className="text-xs lg:text-sm text-white/80">Share your impact with friends!</p>
+                           </div>
+                         </div>
+                         <Button
+                           onClick={handleShareExisting}
+                           className="bg-white text-slate-900 hover:bg-slate-100 font-bold px-4 lg:px-6 h-10 lg:h-12 rounded-full shadow-lg"
+                         >
+                           Share Now
+                         </Button>
+                       </div>
+                     </CardContent>
+                   </Card>
+                 </motion.div>
+               )}
 
                {/* Stats Grid - Mobile only, desktop shows in header */}
                <div className="grid grid-cols-2 gap-3 lg:hidden">
