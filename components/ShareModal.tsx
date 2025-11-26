@@ -64,30 +64,46 @@ export const ShareModal: React.FC<ShareModalProps> = ({ onClose, data }) => {
   const impactAmount = data.amount * CONFIG.MATCH_MULTIPLIER;
   const shareUrl = typeof window !== 'undefined' ? window.location.href : 'https://example.com';
 
-  // Personalized share text (for donors)
-  const personalizedShareText = `I just gave ${formatCurrency(data.amount)} to Businesses Beyond Borders through The 127 Envelope Challenge and it's being DOUBLED to ${formatCurrency(impactAmount)}! Only a few days left - join me in making an impact!`;
+  // ============================================
+  // PLATFORM-SPECIFIC OPTIMIZED SHARE TEXT
+  // ============================================
 
-  // General share text (for everyone)
-  const generalShareText = `Check out The 127 Envelope Challenge! Every donation to Businesses Beyond Borders is being DOUBLED right now. Only a few days left to make your gift go 2X!`;
-
-  const shareText = isPersonalized ? personalizedShareText : generalShareText;
-
-  // Twitter/X text
+  // TWITTER/X - Short, punchy, uses hashtags and handles (280 char limit)
   const twitterText = isPersonalized
-    ? `Just donated to @BBB_org through The 127 Envelope Challenge - my ${formatCurrency(data.amount)} gift is being DOUBLED! Join me:`
-    : `Every donation is being DOUBLED! Check out The 127 Envelope Challenge for @BBB_org - make your gift go 2X:`;
+    ? `I just picked envelope #${Math.floor(data.amount)} in The 127 Envelope Challenge! My ${formatCurrency(data.amount)} gift to @BBBGlobal is being DOUBLED to ${formatCurrency(impactAmount)}! 🎯 Only a few days left - pick YOUR envelope:`
+    : `🔥 Every single dollar is being MATCHED right now! The 127 Envelope Challenge for @BBBGlobal - pick an envelope, make 2X the impact. Who's in?`;
 
-  // WhatsApp/SMS text
-  const messageText = isPersonalized
-    ? `Hey! I just donated ${formatCurrency(data.amount)} to Businesses Beyond Borders (a 501c3) through The 127 Envelope Challenge and it's being matched 2X! We only have a few days left to reach the goal. Would you consider joining me? Every dollar is doubled! ${shareUrl}`
-    : `Hey! Have you seen The 127 Envelope Challenge? Every donation to Businesses Beyond Borders (a 501c3) is being DOUBLED right now! Only a few days left. Check it out: ${shareUrl}`;
+  // FACEBOOK - Longer, more personal, storytelling format
+  const facebookText = isPersonalized
+    ? `I just did something exciting! 🎉\n\nI picked envelope #${Math.floor(data.amount)} in The 127 Envelope Challenge, and my ${formatCurrency(data.amount)} gift to Businesses Beyond Borders is being DOUBLED to ${formatCurrency(impactAmount)}!\n\nThis 501(c)(3) helps entrepreneurs in underserved communities build sustainable businesses. Only a few days left in this matching campaign!\n\nWho wants to pick an envelope and double their impact too?`
+    : `Have you heard about The 127 Envelope Challenge? 💡\n\nEvery donation to Businesses Beyond Borders is being MATCHED right now! That means your gift goes 2X further to help entrepreneurs in underserved communities.\n\nPick an envelope from $1-$127 and watch your impact double. Only a few days left!`;
+
+  // WHATSAPP - Conversational, personal, includes emoji sparingly
+  const whatsappText = isPersonalized
+    ? `Hey! I just did something cool and wanted to share it with you 🙌\n\nI donated ${formatCurrency(data.amount)} to Businesses Beyond Borders through this fun "127 Envelope Challenge" - and get this - it's being DOUBLED to ${formatCurrency(impactAmount)}!\n\nThey're a 501(c)(3) that helps entrepreneurs start businesses in underserved communities. The matching only lasts a few more days.\n\nWould you want to pick an envelope too? Here's the link: ${shareUrl}`
+    : `Hey! Have you seen this? 👀\n\nThere's this cool thing called The 127 Envelope Challenge where every donation is being DOUBLED right now!\n\nYou pick an envelope ($1-$127), donate that amount to Businesses Beyond Borders (a 501c3), and it gets matched 2X.\n\nOnly a few days left - thought you might be interested! ${shareUrl}`;
+
+  // SMS/TEXT - Super short, direct, action-oriented
+  const smsText = isPersonalized
+    ? `I just gave ${formatCurrency(data.amount)} to BBB and it's being DOUBLED to ${formatCurrency(impactAmount)}! Pick an envelope before matching ends: ${shareUrl}`
+    : `Every donation is being MATCHED 2X right now! Pick an envelope $1-$127 and double your impact: ${shareUrl}`;
+
+  // NATIVE SHARE (iOS/Android share sheet) - Medium length, universal
+  const nativeShareText = isPersonalized
+    ? `I just gave ${formatCurrency(data.amount)} to Businesses Beyond Borders through The 127 Envelope Challenge and it's being DOUBLED to ${formatCurrency(impactAmount)}! Only a few days left to double your impact - pick an envelope and join me!`
+    : `Check out The 127 Envelope Challenge! Every donation to Businesses Beyond Borders is being MATCHED right now. Pick an envelope from $1-$127 and make 2X the impact!`;
+
+  // COPY LINK - What gets copied to clipboard
+  const copyText = isPersonalized
+    ? `The 127 Envelope Challenge - I gave ${formatCurrency(data.amount)} and it became ${formatCurrency(impactAmount)}! Every dollar DOUBLED for Businesses Beyond Borders. Pick your envelope: ${shareUrl}`
+    : `The 127 Envelope Challenge - Every dollar DOUBLED! Pick an envelope $1-$127 and make 2X impact for Businesses Beyond Borders: ${shareUrl}`;
 
   const handleShare = async () => {
     if (navigator.share) {
       try {
         await navigator.share({
           title: 'The 127 Envelope Challenge - Double Your Impact!',
-          text: shareText,
+          text: nativeShareText,
           url: shareUrl,
         });
       } catch (err) {
@@ -99,16 +115,16 @@ export const ShareModal: React.FC<ShareModalProps> = ({ onClose, data }) => {
   };
 
   const handleCopyLink = () => {
-    navigator.clipboard.writeText(`${shareText} ${shareUrl}`);
+    navigator.clipboard.writeText(copyText);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
   const socialLinks = {
     twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(twitterText)}&url=${encodeURIComponent(shareUrl)}`,
-    facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(shareText)}`,
-    whatsapp: `https://wa.me/?text=${encodeURIComponent(messageText)}`,
-    sms: `sms:?body=${encodeURIComponent(messageText)}`,
+    facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(facebookText)}`,
+    whatsapp: `https://wa.me/?text=${encodeURIComponent(whatsappText)}`,
+    sms: `sms:?body=${encodeURIComponent(smsText)}`,
   };
 
   return (
