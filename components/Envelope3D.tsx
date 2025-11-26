@@ -76,17 +76,19 @@ export const Envelope3D: React.FC<Envelope3DProps> = ({ amount, isClaimed, isOpe
           }}
         >
           <motion.div
-            className="w-full h-full origin-top transform-style-3d"
+            className="w-full h-full transform-style-3d"
             variants={flapVariants}
             initial="closed"
             animate={isOpen ? "open" : "closed"}
             style={{
               willChange: 'transform',
               WebkitTransformStyle: 'preserve-3d',
-              transformStyle: 'preserve-3d'
+              transformStyle: 'preserve-3d',
+              transformOrigin: 'center bottom',
+              WebkitTransformOrigin: 'center bottom'
             }}
           >
-            {/* Front of Flap (Closed state) */}
+            {/* Front of Flap (Closed state) - triangle pointing DOWN into envelope */}
             <div
               className="absolute inset-0"
               style={{
@@ -97,17 +99,17 @@ export const Envelope3D: React.FC<Envelope3DProps> = ({ amount, isClaimed, isOpe
                 WebkitClipPath: 'polygon(0% 0%, 100% 0%, 50% 100%)',
                 backfaceVisibility: 'hidden',
                 WebkitBackfaceVisibility: 'hidden',
-                transform: 'translateZ(1px)', // Safari fix: force stacking context
+                transform: 'translateZ(1px)',
                 WebkitTransform: 'translateZ(1px)'
               }}
             />
 
             {/* Back of Flap (Visible when open) */}
             <div
-               className="absolute inset-0 bg-white/95 border-t border-slate-100"
+               className="absolute inset-0 bg-white/95"
                style={{
-                 transform: 'rotateX(-180deg) translateZ(0px)',
-                 WebkitTransform: 'rotateX(-180deg) translateZ(0px)',
+                 transform: 'rotateX(180deg) translateZ(0px)',
+                 WebkitTransform: 'rotateX(180deg) translateZ(0px)',
                  clipPath: 'polygon(0% 0%, 100% 0%, 50% 100%)',
                  WebkitClipPath: 'polygon(0% 0%, 100% 0%, 50% 100%)',
                  backfaceVisibility: 'hidden',
