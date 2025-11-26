@@ -19,10 +19,9 @@ export interface StorageData {
   donors: Donor[];
 }
 
-export interface TierConfig { 
-  label: Tier; 
-  min: number; 
-  max: number; 
-  background: string; 
-  solid: string;
+export interface SuggestionCardProps {
+  title: string;
+  description: string;
+  targetId: number;
+  onClick: (id: number) => void;
 }

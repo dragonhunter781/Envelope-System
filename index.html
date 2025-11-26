@@ -2,13 +2,14 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover, user-scalable=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <title>The 127 Envelope Challenge</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script>
       tailwind.config = {
+        darkMode: 'class',
         theme: {
           extend: {
             fontFamily: {
@@ -16,6 +17,10 @@
             },
             colors: {
               background: '#f8fafc',
+              surface: '#ffffff',
+              primary: '#3b82f6',
+              text: '#0f172a',
+              muted: '#64748b',
             },
             animation: {
               'shine': 'shine 2s infinite linear',
@@ -31,36 +36,30 @@
       }
     </script>
     <style>
-      /* GLOBAL RESET FOR MOBILE SAFETY */
-      html, body {
+      /* CRITICAL: Force the document background to match the app background. */
+      html {
+        background-color: #f8fafc;
+        width: 100%;
+        height: 100%;
+        overflow-x: hidden;
+      }
+      body {
+        background-color: #f8fafc;
+        color: #0f172a;
         width: 100%;
         max-width: 100%;
+        overflow-x: hidden;
         margin: 0;
         padding: 0;
-        background-color: #f8fafc; /* Slate-50 matches app bg */
-        overflow-x: hidden !important;
-        -webkit-overflow-scrolling: touch;
+        min-height: 100vh;
+        /* Mobile safe area handling */
+        padding-bottom: env(safe-area-inset-bottom);
       }
-
       #root {
         width: 100%;
         max-width: 100%;
-        overflow-x: hidden !important;
-        display: flex;
-        justify-content: center;
+        overflow-x: hidden;
       }
-
-      /* Base Box Sizing */
-      *, *::before, *::after {
-        box-sizing: border-box;
-      }
-
-      /* Prevent media overflow */
-      img, iframe, canvas, video {
-        max-width: 100% !important;
-      }
-
-      /* Utilities */
       .perspective-1000 {
         perspective: 1000px;
       }
@@ -69,12 +68,8 @@
       }
       .backface-hidden {
         backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
       }
-      .rotate-y-180 {
-        transform: rotateY(180deg);
-      }
-      
-      /* Hide scrollbar */
       .no-scrollbar::-webkit-scrollbar {
         display: none;
       }
@@ -83,20 +78,20 @@
         scrollbar-width: none;
       }
     </style>
-    <script type="importmap">
-    {
-      "imports": {
-        "react": "https://aistudiocdn.com/react@^19.2.0",
-        "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
-        "react/": "https://aistudiocdn.com/react@^19.2.0/",
-        "tailwind-merge": "https://aistudiocdn.com/tailwind-merge@^3.4.0",
-        "framer-motion": "https://aistudiocdn.com/framer-motion@^12.23.24",
-        "clsx": "https://aistudiocdn.com/clsx@^2.1.1",
-        "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2"
-      }
-    }
-    </script>
-  </head>
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "tailwind-merge": "https://aistudiocdn.com/tailwind-merge@^3.4.0",
+    "framer-motion": "https://aistudiocdn.com/framer-motion@^12.23.24",
+    "clsx": "https://aistudiocdn.com/clsx@^2.1.1",
+    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2"
+  }
+}
+</script>
+</head>
   <body>
     <div id="root"></div>
   </body>
