@@ -14,7 +14,7 @@ interface Envelope3DProps {
 export const Envelope3D: React.FC<Envelope3DProps> = ({ amount, isClaimed, isOpen, showContent, className }) => {
   const tier = getTierForAmount(amount);
 
-  // Animation variants for the flap - rotates backward (negative) to open correctly
+  // Animation variants for the flap - rotates backward from TOP edge to open
   const flapVariants: Variants = {
     closed: {
       rotateX: 0,
@@ -84,19 +84,19 @@ export const Envelope3D: React.FC<Envelope3DProps> = ({ amount, isClaimed, isOpe
               willChange: 'transform',
               WebkitTransformStyle: 'preserve-3d',
               transformStyle: 'preserve-3d',
-              transformOrigin: 'center bottom',
-              WebkitTransformOrigin: 'center bottom'
+              transformOrigin: 'center top',
+              WebkitTransformOrigin: 'center top'
             }}
           >
-            {/* Front of Flap (Closed state) - triangle pointing UP, base at bottom */}
+            {/* Front of Flap (Closed state) - triangle pointing DOWN like a sealed envelope */}
             <div
               className="absolute inset-0"
               style={{
                 backgroundColor: tier?.solid || '#10b981',
                 backgroundImage: tier?.gradient,
                 backgroundSize: 'cover',
-                clipPath: 'polygon(0% 100%, 50% 0%, 100% 100%)',
-                WebkitClipPath: 'polygon(0% 100%, 50% 0%, 100% 100%)',
+                clipPath: 'polygon(0% 0%, 100% 0%, 50% 100%)',
+                WebkitClipPath: 'polygon(0% 0%, 100% 0%, 50% 100%)',
                 backfaceVisibility: 'hidden',
                 WebkitBackfaceVisibility: 'hidden',
                 transform: 'translateZ(1px)',
@@ -110,8 +110,8 @@ export const Envelope3D: React.FC<Envelope3DProps> = ({ amount, isClaimed, isOpe
                style={{
                  transform: 'rotateX(180deg) translateZ(0px)',
                  WebkitTransform: 'rotateX(180deg) translateZ(0px)',
-                 clipPath: 'polygon(0% 100%, 50% 0%, 100% 100%)',
-                 WebkitClipPath: 'polygon(0% 100%, 50% 0%, 100% 100%)',
+                 clipPath: 'polygon(0% 0%, 100% 0%, 50% 100%)',
+                 WebkitClipPath: 'polygon(0% 0%, 100% 0%, 50% 100%)',
                  backfaceVisibility: 'hidden',
                  WebkitBackfaceVisibility: 'hidden'
                }}
