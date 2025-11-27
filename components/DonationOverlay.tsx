@@ -21,6 +21,7 @@ export const DonationOverlay: React.FC<DonationOverlayProps> = ({ envelope, onCl
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [anonymousMessage, setAnonymousMessage] = useState('');
   const [donationCompleted, setDonationCompleted] = useState(false);
+  const [showFallbackButton, setShowFallbackButton] = useState(false);
   const hasClaimedRef = React.useRef(false);
 
   useEffect(() => {
@@ -31,6 +32,7 @@ export const DonationOverlay: React.FC<DonationOverlayProps> = ({ envelope, onCl
     setIsAnonymous(false);
     setAnonymousMessage('');
     setDonationCompleted(false);
+    setShowFallbackButton(false);
     hasClaimedRef.current = false;
 
     const t1 = setTimeout(() => setAnimationStage(1), 300); // Zoom
@@ -106,6 +108,19 @@ export const DonationOverlay: React.FC<DonationOverlayProps> = ({ envelope, onCl
       window.removeEventListener('message', handleDonorboxMessage);
     };
   }, [step, donorName, email, isAnonymous, anonymousMessage, onClaim]);
+
+  // Show fallback button after delay (45 seconds) - gives time to complete donation
+  useEffect(() => {
+    if (step === 'payment') {
+      setShowFallbackButton(false); // Reset when entering payment step
+      const fallbackTimer = setTimeout(() => {
+        setShowFallbackButton(true);
+        console.log('⏱️ Fallback button now visible');
+      }, 45000); // 45 seconds
+
+      return () => clearTimeout(fallbackTimer);
+    }
+  }, [step]);
 
   const handleDetailsSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -291,9 +306,17 @@ export const DonationOverlay: React.FC<DonationOverlayProps> = ({ envelope, onCl
                        <p className="text-xs text-slate-500 text-center mb-2">
                          Your donation will be recorded automatically when complete.
                        </p>
-                       <Button onClick={handlePaymentComplete} variant="outline" className="w-full h-10 text-slate-600 border-slate-300 rounded-xl shrink-0">
-                          I Already Donated (manual confirmation)
-                       </Button>
+                       {showFallbackButton && (
+                         <motion.div
+                           initial={{ opacity: 0, y: 10 }}
+                           animate={{ opacity: 1, y: 0 }}
+                           transition={{ duration: 0.3 }}
+                         >
+                           <Button onClick={handlePaymentComplete} variant="outline" className="w-full h-10 text-slate-600 border-slate-300 rounded-xl shrink-0">
+                              I Already Donated (manual confirmation)
+                           </Button>
+                         </motion.div>
+                       )}
                     </div>
                   ) : (
                     <div className="h-full flex flex-col items-center justify-center animate-in fade-in zoom-in-95 duration-500 py-8">
