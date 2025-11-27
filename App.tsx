@@ -214,7 +214,10 @@ const App: React.FC = () => {
     if (!donatingEnvelope) return;
     const currentAmount = donatingEnvelope.amount;
     const idsToClaim = [...selectedIds];
-    
+
+    // Store previous state for potential rollback
+    const previousData = { ...data };
+
     // Optimistic UI Update
     const newEnvelopes = { ...data.envelopes };
     idsToClaim.forEach(id => {
@@ -226,19 +229,33 @@ const App: React.FC = () => {
     const newData = { envelopes: newEnvelopes, donors: newDonors };
     setData(newData);
     saveToStorage(newData);
-    
+
     setDonatingEnvelope(null);
     setSelectedIds([]);
 
-    // Set verified donor status immediately after donation
-    setVerifiedDonor({ name, amount: currentAmount });
+    // Save to Supabase and verify success
+    const success = await db.claimEnvelopes(idsToClaim, name, email);
 
-    // Fire enhanced confetti celebration
-    if (!isCampaignComplete) {
-      fireConfetti();
+    if (success) {
+      // Set verified donor status after successful database save
+      setVerifiedDonor({ name, amount: currentAmount });
+
+      // Fire enhanced confetti celebration
+      if (!isCampaignComplete) {
+        fireConfetti();
+      }
+      setShareData({ amount: currentAmount, name });
+      console.log('✅ Donation saved to Supabase successfully!');
+    } else {
+      // Rollback optimistic update on failure
+      console.error('❌ Failed to save donation to Supabase - rolling back');
+      setData(previousData);
+      saveToStorage(previousData);
+      // Re-select the envelopes so user can try again
+      setSelectedIds(idsToClaim);
+      // Show error to user (you could add a toast notification here)
+      alert('There was an error saving your donation. Please try again.');
     }
-    setShareData({ amount: currentAmount, name });
-    await db.claimEnvelopes(idsToClaim, name, email);
   };
 
   // Share handler - personalized for donors, general for everyone else

@@ -6,9 +6,16 @@ import { StorageData, EnvelopeData, Donor } from '../types';
 // We use a simple check to see if the key has been updated from the default placeholder
 const isConfigured = CONFIG.SUPABASE_KEY && !CONFIG.SUPABASE_KEY.includes("YOUR_SUPABASE");
 
-export const supabase = isConfigured 
+export const supabase = isConfigured
   ? createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY)
   : null;
+
+// Log connection status for debugging
+if (supabase) {
+  console.log('✅ Supabase configured:', CONFIG.SUPABASE_URL);
+} else {
+  console.warn('⚠️ Supabase NOT configured - donations will only be stored locally');
+}
 
 // Service to sync data
 export const db = {
