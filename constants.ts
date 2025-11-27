@@ -9,7 +9,7 @@ export const CONFIG = {
   TOTAL_ENVELOPES: 127,
   // PASTE YOUR KEYS HERE
   SUPABASE_URL: "https://kextsgnywbflvxadzawn.supabase.co", 
-  SUPABASE_KEY: "sb_publishable_cGWZggP4-OfADkGO5fso_Q_bq5wrPS3"
+  SUPABASE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtleHRzZ255d2JmbHZ4YWR6YXduIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQxMDg5OTEsImV4cCI6MjA3OTY4NDk5MX0.wDuOVbJOOLVSPI7UFSzGMdp6qdi5FssR9Rk32v3tPgA"
 };
 
 // Using inline HEX gradients to ensure compatibility and avoid Tailwind JIT issues with dynamic classes

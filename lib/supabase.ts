@@ -40,6 +40,8 @@ export const db = {
         .order('claimed_at', { ascending: false })
         .range(0, 1000);
 
+      console.log('📊 Supabase donors fetch:', { donorData, donorError });
+
       if (donorError) throw donorError;
 
       // Transform to App format
@@ -54,13 +56,57 @@ export const db = {
         };
       });
 
-      const donors: Donor[] = donorData?.map((row: any) => ({
+      // Get donors from donors table
+      const donorsFromTable: Donor[] = donorData?.map((row: any) => ({
         name: row.name,
         amount: row.amount,
         claimedAt: row.claimed_at
       })) || [];
 
-      return { envelopes, donors };
+      // Also extract donors from claimed envelopes (in case they didn't complete the donors table entry)
+      const donorsFromEnvelopes: Donor[] = [];
+      const donorMap = new Map<string, { amount: number; claimedAt: string }>();
+
+      // Group envelope claims by donor name to get total amount per person
+      envData?.forEach((row: any) => {
+        if (row.is_claimed && row.claimed_by) {
+          const existing = donorMap.get(row.claimed_by);
+          if (existing) {
+            existing.amount += row.amount;
+            // Keep the most recent claimed_at
+            if (row.claimed_at > existing.claimedAt) {
+              existing.claimedAt = row.claimed_at;
+            }
+          } else {
+            donorMap.set(row.claimed_by, {
+              amount: row.amount,
+              claimedAt: row.claimed_at || new Date().toISOString()
+            });
+          }
+        }
+      });
+
+      // Convert map to array
+      donorMap.forEach((value, name) => {
+        donorsFromEnvelopes.push({
+          name,
+          amount: value.amount,
+          claimedAt: value.claimedAt
+        });
+      });
+
+      // Merge donors: prefer donors table data, but include envelope-only donors
+      const donorNames = new Set(donorsFromTable.map(d => d.name));
+      const mergedDonors = [
+        ...donorsFromTable,
+        ...donorsFromEnvelopes.filter(d => !donorNames.has(d.name))
+      ].sort((a, b) => new Date(b.claimedAt).getTime() - new Date(a.claimedAt).getTime());
+
+      console.log('📊 Donors from table:', donorsFromTable.length);
+      console.log('📊 Donors from envelopes:', donorsFromEnvelopes.length);
+      console.log('📊 Merged donors:', mergedDonors);
+
+      return { envelopes, donors: mergedDonors };
 
     } catch (error) {
       console.error("Supabase Fetch Error:", error);
