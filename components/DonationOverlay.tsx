@@ -15,11 +15,13 @@ interface DonationOverlayProps {
 
 export const DonationOverlay: React.FC<DonationOverlayProps> = ({ envelope, onClose, onClaim }) => {
   const [animationStage, setAnimationStage] = useState<0 | 1 | 2 | 3>(0);
-  const [step, setStep] = useState<'details' | 'payment'>('details');
+  const [step, setStep] = useState<'details' | 'payment' | 'success'>('details');
   const [donorName, setDonorName] = useState('');
   const [email, setEmail] = useState('');
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [anonymousMessage, setAnonymousMessage] = useState('');
+  const [donationCompleted, setDonationCompleted] = useState(false);
+  const hasClaimedRef = React.useRef(false);
 
   useEffect(() => {
     setAnimationStage(0);
@@ -28,6 +30,8 @@ export const DonationOverlay: React.FC<DonationOverlayProps> = ({ envelope, onCl
     setEmail('');
     setIsAnonymous(false);
     setAnonymousMessage('');
+    setDonationCompleted(false);
+    hasClaimedRef.current = false;
 
     const t1 = setTimeout(() => setAnimationStage(1), 300); // Zoom
     const t2 = setTimeout(() => setAnimationStage(2), 800); // Open
@@ -39,6 +43,69 @@ export const DonationOverlay: React.FC<DonationOverlayProps> = ({ envelope, onCl
       clearTimeout(t3);
     };
   }, [envelope.id]);
+
+  // Listen for Donorbox postMessage events to detect donation completion
+  useEffect(() => {
+    const handleDonorboxMessage = (event: MessageEvent) => {
+      // Check if message is from Donorbox
+      if (event.origin !== 'https://donorbox.org') return;
+
+      // Log all messages for debugging
+      console.log('📬 Donorbox message received:', event.data);
+
+      // Donorbox sends various message types - check for completion signals
+      const data = event.data;
+
+      // Handle string messages
+      if (typeof data === 'string') {
+        // Donorbox may send "donation_complete" or similar strings
+        if (data.includes('complete') || data.includes('success') || data.includes('thank')) {
+          handleDonationSuccess();
+        }
+      }
+
+      // Handle object messages
+      if (typeof data === 'object' && data !== null) {
+        // Check for common completion indicators
+        if (
+          data.type === 'donation_complete' ||
+          data.type === 'donorbox_donation_complete' ||
+          data.status === 'completed' ||
+          data.status === 'success' ||
+          data.event === 'donation_complete' ||
+          data.event === 'thank_you' ||
+          data.donationComplete === true ||
+          data.completed === true
+        ) {
+          handleDonationSuccess();
+        }
+      }
+    };
+
+    const handleDonationSuccess = () => {
+      // Prevent duplicate claims
+      if (hasClaimedRef.current) return;
+      hasClaimedRef.current = true;
+
+      console.log('✅ Donation completed! Auto-claiming envelope...');
+      setDonationCompleted(true);
+      setStep('success');
+
+      // Use the stored donor name (already set in handleDetailsSubmit for anonymous)
+      const finalName = isAnonymous ? `Anonymous: "${anonymousMessage}"` : donorName;
+      onClaim(finalName, email);
+    };
+
+    // Only listen when on payment step
+    if (step === 'payment') {
+      window.addEventListener('message', handleDonorboxMessage);
+      console.log('👂 Listening for Donorbox messages...');
+    }
+
+    return () => {
+      window.removeEventListener('message', handleDonorboxMessage);
+    };
+  }, [step, donorName, email, isAnonymous, anonymousMessage, onClaim]);
 
   const handleDetailsSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,7 +127,14 @@ export const DonationOverlay: React.FC<DonationOverlayProps> = ({ envelope, onCl
   };
 
   const handlePaymentComplete = () => {
-    onClaim(donorName, email);
+    // Prevent duplicate claims
+    if (hasClaimedRef.current) return;
+    hasClaimedRef.current = true;
+
+    const finalName = isAnonymous ? `Anonymous: "${anonymousMessage}"` : donorName;
+    setDonationCompleted(true);
+    setStep('success');
+    onClaim(finalName, email);
   };
 
   return (
@@ -104,9 +178,9 @@ export const DonationOverlay: React.FC<DonationOverlayProps> = ({ envelope, onCl
         <motion.div
             className="absolute z-30 w-[92%] max-w-[380px] lg:max-w-[500px] bg-white rounded-xl shadow-2xl overflow-hidden flex flex-col"
             initial={{ y: 100, height: 0, opacity: 0 }}
-            animate={{ 
+            animate={{
               y: animationStage === 3 ? 0 : 100,
-              height: animationStage === 3 ? (step === 'payment' ? '85%' : 'auto') : 0,
+              height: animationStage === 3 ? (step === 'payment' ? '85%' : step === 'success' ? 'auto' : 'auto') : 0,
               opacity: animationStage === 3 ? 1 : 0
             }}
             transition={{ duration: 0.5, ease: "easeOut" }}
@@ -202,20 +276,38 @@ export const DonationOverlay: React.FC<DonationOverlayProps> = ({ envelope, onCl
                          Next Step
                        </Button>
                     </form>
-                  ) : (
+                  ) : step === 'payment' ? (
                     <div className="h-full flex flex-col animate-in fade-in zoom-in-95 duration-500">
                        <div className="flex-1 bg-white border border-slate-200 rounded-lg overflow-hidden mb-4 relative">
-                          <iframe 
-                              src={`https://donorbox.org/embed/matching-donation-campaign?amount=${envelope.amount}&hide_donation_meter=true`} 
-                              name="donorbox" 
-                              frameBorder="0" 
-                              scrolling="yes" 
+                          <iframe
+                              src={`https://donorbox.org/embed/matching-donation-campaign?amount=${envelope.amount}&hide_donation_meter=true&email=${encodeURIComponent(email)}&first_name=${encodeURIComponent(isAnonymous ? 'Anonymous' : donorName.split(' ')[0])}&last_name=${encodeURIComponent(isAnonymous ? 'Donor' : donorName.split(' ').slice(1).join(' ') || '')}`}
+                              name="donorbox"
+                              frameBorder="0"
+                              scrolling="yes"
                               allow="payment"
                               className="w-full h-full absolute inset-0"
                             />
                        </div>
-                       <Button onClick={handlePaymentComplete} className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg shrink-0">
-                          I Completed My Donation
+                       <p className="text-xs text-slate-500 text-center mb-2">
+                         Your donation will be recorded automatically when complete.
+                       </p>
+                       <Button onClick={handlePaymentComplete} variant="outline" className="w-full h-10 text-slate-600 border-slate-300 rounded-xl shrink-0">
+                          I Already Donated (manual confirmation)
+                       </Button>
+                    </div>
+                  ) : (
+                    <div className="h-full flex flex-col items-center justify-center animate-in fade-in zoom-in-95 duration-500 py-8">
+                       <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mb-4">
+                         <svg className="w-10 h-10 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                           <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                         </svg>
+                       </div>
+                       <h3 className="text-2xl font-bold text-slate-900 mb-2">Thank You!</h3>
+                       <p className="text-slate-600 text-center mb-6">
+                         Your generous donation of {formatCurrency(envelope.amount)} has been recorded.
+                       </p>
+                       <Button onClick={onClose} className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg">
+                          Close
                        </Button>
                     </div>
                   )}
