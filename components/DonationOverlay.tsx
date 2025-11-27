@@ -18,12 +18,16 @@ export const DonationOverlay: React.FC<DonationOverlayProps> = ({ envelope, onCl
   const [step, setStep] = useState<'details' | 'payment'>('details');
   const [donorName, setDonorName] = useState('');
   const [email, setEmail] = useState('');
+  const [isAnonymous, setIsAnonymous] = useState(false);
+  const [anonymousMessage, setAnonymousMessage] = useState('');
 
   useEffect(() => {
     setAnimationStage(0);
     setStep('details');
     setDonorName('');
     setEmail('');
+    setIsAnonymous(false);
+    setAnonymousMessage('');
 
     const t1 = setTimeout(() => setAnimationStage(1), 300); // Zoom
     const t2 = setTimeout(() => setAnimationStage(2), 800); // Open
@@ -38,7 +42,20 @@ export const DonationOverlay: React.FC<DonationOverlayProps> = ({ envelope, onCl
 
   const handleDetailsSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!donorName) return;
+
+    // Validation
+    if (!isAnonymous && !donorName) return;
+    if (isAnonymous && !anonymousMessage) {
+      alert('Please select a message for your anonymous donation.');
+      return;
+    }
+    if (!email) return;
+
+    // Set donor name for anonymous donations
+    if (isAnonymous) {
+      setDonorName(`Anonymous: "${anonymousMessage}"`);
+    }
+
     setStep('payment');
   };
 
@@ -111,19 +128,67 @@ export const DonationOverlay: React.FC<DonationOverlayProps> = ({ envelope, onCl
                 <div className="p-6 flex-1">
                   {step === 'details' ? (
                     <form onSubmit={handleDetailsSubmit} className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                       <div>
-                         <label className="block text-xs font-bold uppercase text-slate-400 mb-1">Your Name</label>
-                         <Input 
-                           required
-                           value={donorName}
-                           onChange={(e) => setDonorName(e.target.value)}
-                           placeholder="Enter your name"
-                           className="h-12 text-lg"
+                       {/* Anonymous Toggle */}
+                       <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-200">
+                         <input
+                           type="checkbox"
+                           id="anonymous"
+                           checked={isAnonymous}
+                           onChange={(e) => setIsAnonymous(e.target.checked)}
+                           className="w-5 h-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
                          />
+                         <label htmlFor="anonymous" className="text-sm font-medium text-slate-700 cursor-pointer">
+                           Give anonymously
+                         </label>
                        </div>
+
+                       {/* Name Field - Hidden when anonymous */}
+                       {!isAnonymous && (
+                         <div>
+                           <label className="block text-xs font-bold uppercase text-slate-400 mb-1">Your Name</label>
+                           <Input
+                             required
+                             value={donorName}
+                             onChange={(e) => setDonorName(e.target.value)}
+                             placeholder="Enter your name"
+                             className="h-12 text-lg"
+                           />
+                         </div>
+                       )}
+
+                       {/* Anonymous Message Selection */}
+                       {isAnonymous && (
+                         <div>
+                           <label className="block text-xs font-bold uppercase text-slate-400 mb-2">Select a Message</label>
+                           <div className="space-y-2">
+                             {[
+                               "Giving with gratitude!",
+                               "Blessed to be a blessing.",
+                               "For the glory of God!",
+                               "Happy to help!"
+                             ].map((msg) => (
+                               <button
+                                 key={msg}
+                                 type="button"
+                                 onClick={() => setAnonymousMessage(msg)}
+                                 className={cn(
+                                   "w-full p-3 text-left rounded-lg border-2 transition-all text-sm",
+                                   anonymousMessage === msg
+                                     ? "border-emerald-500 bg-emerald-50 text-emerald-700"
+                                     : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
+                                 )}
+                               >
+                                 "{msg}"
+                               </button>
+                             ))}
+                           </div>
+                         </div>
+                       )}
+
+                       {/* Email - Always required */}
                        <div>
-                         <label className="block text-xs font-bold uppercase text-slate-400 mb-1">Email</label>
-                         <Input 
+                         <label className="block text-xs font-bold uppercase text-slate-400 mb-1">Email (for receipt)</label>
+                         <Input
                            required
                            type="email"
                            value={email}
@@ -132,6 +197,7 @@ export const DonationOverlay: React.FC<DonationOverlayProps> = ({ envelope, onCl
                            className="h-12 text-lg"
                          />
                        </div>
+
                        <Button type="submit" className="w-full h-14 mt-4 text-lg font-bold bg-slate-900 text-white rounded-xl shadow-lg">
                          Next Step
                        </Button>
