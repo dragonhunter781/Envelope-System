@@ -3,7 +3,7 @@ import { Tier } from './types';
 export const CONFIG = {
   CAMPAIGN_NAME: "matching-donation-campaign",
   DONORBOX_URL: "https://donorbox.org/matching-donation-campaign",
-  END_DATE: "2025-11-29T23:59:59",
+  END_DATE: "2025-12-31T23:59:59",
   GOAL_AMOUNT: 8128,
   MATCH_MULTIPLIER: 2,
   TOTAL_ENVELOPES: 127,
